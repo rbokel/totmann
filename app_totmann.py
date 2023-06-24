@@ -79,6 +79,7 @@ label.pack()
 
 button = tk.Button(text="Click me!",command=handle_click, font=("Arial", 32))
 button.pack(fill=tk.BOTH, expand=True)
+button.bind("<Enter>", handle_click)
 
 window.after(1000, update_time)
 window.mainloop()

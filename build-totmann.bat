@@ -9,6 +9,7 @@ pyinstaller --onefile ^
   --name totmann ^
   --noconsole ^
   --paths=.\myvenv\Lib\site-packages ^
+  --icon=.\tm_32.ico ^
   .\app_totmann.py 
   
 del totmann.exe
