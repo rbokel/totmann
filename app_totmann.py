@@ -1,7 +1,7 @@
 import tkinter as tk
 from playsound import playsound
 
-_COUNTDOWN_LENGTH = 60
+_COUNTDOWN_LENGTH = 3*60
 _TIMEOUT_LENGTH = 15*60
 
 _countdown_timer = None
@@ -20,11 +20,12 @@ def handle_click():
     
     window.iconify()
     if _countdown_timer is None:
+        window.after(_TIMEOUT_LENGTH*1000, update_time)
         return
     
     window.after_cancel(_countdown_timer)
-    window.after(_TIMEOUT_LENGTH*1000, update_time)
     _countdown_timer = None
+
 
 
 button = tk.Button(text="Click me!",command=handle_click, font=("Arial", 32))
@@ -35,7 +36,7 @@ def lift_window(window):
     window.deiconify()
     window.attributes('-topmost', True)
     window.update_idletasks()  # get window on top
-    window.attributes('-topmost', False)  # prevent permanent focus 
+    # window.attributes('-topmost', False)  # prevent permanent focus 
     # window.focus_force()  # focus to the window
 
 def countdown(count):
@@ -47,9 +48,13 @@ def countdown(count):
     if count > 0:
         # call countdown again after 1000ms (1s)
         _countdown_timer= window.after(1000, countdown, count-1)
+        if count == 120 or count == 60 :
+            playsound('beep-08b.mp3')
     else:
         print("do alarm")
-        playsound('alarm.mp3')
+        playsound('beep-08b.mp3')
+        # playsound('alarm.mp3')
+
 
 
 def update_time():
