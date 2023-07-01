@@ -1,3 +1,4 @@
+from os import path
 import tkinter as tk
 from playsound import playsound
 
@@ -8,13 +9,16 @@ _REPEAT_LENGTH = 6
 state = "waiting-for-timeout"
 countdown = _TIMEOUT_LENGTH
 
+def appPath(localPath):
+    return path.join(path.dirname(__file__), localPath)
+
 def beep():
     print("BEEP!")
-    playsound("beep.mp3")
+    playsound(appPath("beep.mp3"))
 
 def alert():
     print("ALERT!")
-    playsound("alarm.mp3", block=False)
+    playsound(appPath("alarm.mp3"), block=False)
 
 def hideWindow():
     window.iconify()

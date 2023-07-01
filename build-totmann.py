@@ -10,18 +10,19 @@ pyi.run([
     "app_totmann.py",
     "--name=totmann",
     "--icon=./tm_32.ico",
+    "--add-binary=./beep.mp3;.",
     "--onefile",
     "--clean",
     "--noconsole",
     "--paths=./.venv/Lib/site-packages",])
 
 timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-targetDir = "dist/"+timestamp+"/"
+targetDir = os.path.join("dist",timestamp)
 os.makedirs(targetDir, exist_ok=True)
-os.rename("dist/totmann.exe", targetDir+"totmann.exe")
+os.rename(os.path.join("dist","totmann.exe"), os.path.join(targetDir,"totmann.exe"))
 
 path = os.path.join(os.environ["USERPROFILE"], "Desktop", 'Totmann.lnk')
-target = os.path.abspath(targetDir+"totmann.exe")
+target = os.path.abspath(os.path.join(targetDir,"totmann.exe"))
 # icon = r'C:\path\to\icon\resource.ico'  # not needed, but nice
 
 shell = win32com.client.Dispatch("WScript.Shell")
@@ -31,4 +32,4 @@ shortcut.Targetpath = target
 shortcut.WindowStyle = 1  # 7 - Minimized, 3 - Maximized, 1 - Normal
 shortcut.save()
 
-print("Done")
+print("Done building Totmann.")
