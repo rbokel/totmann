@@ -11,6 +11,7 @@ pyi.run([
     "--name=totmann",
     "--icon=./tm_32.ico",
     "--add-binary=./beep.mp3;.",
+    "--add-binary=./hilfe.mp3;.",
     "--onefile",
     "--clean",
     "--noconsole",

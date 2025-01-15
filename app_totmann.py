@@ -2,35 +2,44 @@ from os import path
 import tkinter as tk
 from playsound import playsound
 
-_COUNTDOWN_LENGTH = 1*60
-_TIMEOUT_LENGTH = 8 * 60
+_COUNTDOWN_LENGTH = 5 * 60
+_TIMEOUT_LENGTH = 15 * 60
 _REPEAT_LENGTH = 6
+_BUTTON_PAD = 80
 
 state = "waiting-for-timeout"
 countdown = _TIMEOUT_LENGTH
 
+
 def appPath(localPath):
     return path.join(path.dirname(__file__), localPath)
+
 
 def beep():
     print("BEEP!")
     playsound(appPath("beep.mp3"))
+    playsound(appPath("hilfe.mp3"))
+
 
 def alert():
     print("ALERT!")
     playsound(appPath("alarm.mp3"), block=False)
 
+
 def hideWindow():
     window.iconify()
 
+
 def showWindow():
     window.deiconify()
-    window.attributes('-topmost', True)
-    window.update_idletasks() 
+    window.attributes("-topmost", True)
+    window.update_idletasks()
+
 
 def update_label():
-    label['text'] = countdown
-    
+    label["text"] = countdown
+
+
 def update_time():
     global state, countdown
 
@@ -41,37 +50,22 @@ def update_time():
     if state == "waiting-for-timeout":
         hideWindow()
         if countdown <= 0:
-            state = "counting-down-1"
+            state = "counting-down"
             countdown = _COUNTDOWN_LENGTH
-    elif state == "counting-down-1":
+    elif state == "counting-down":
         showWindow()
         if countdown <= 0:
             beep()
-            state = "counting-down-2"
+            state = "counting-down"
             countdown = _COUNTDOWN_LENGTH
-    elif state == "counting-down-2":
-        showWindow()
-        if countdown <= 0:
-            beep()
-            state = "counting-down-3"
-            countdown = _COUNTDOWN_LENGTH
-    elif state == "counting-down-3":
-        showWindow()
-        if countdown <= 0:
-            beep()
-            state = "timeout"
-            countdown = _COUNTDOWN_LENGTH
-    elif state == "timeout":
-        if countdown <= 0:
-            beep()
-            countdown =_REPEAT_LENGTH
-    
+
 
 def handle_click():
     global state, countdown
 
     state = "waiting-for-timeout"
-    countdown = _TIMEOUT_LENGTH    
+    countdown = _TIMEOUT_LENGTH
+
 
 # Create a window
 window = tk.Tk()
@@ -81,8 +75,8 @@ window.geometry("400x400")
 label = tk.Label(text="Totmann", font=("Arial", 32))
 label.pack()
 
-button = tk.Button(text="Click me!",command=handle_click, font=("Arial", 32))
-button.pack(fill=tk.BOTH, expand=True)
+button = tk.Button(text="Hier \nberühren !", command=handle_click, font=("Arial", 32))
+button.pack(fill=tk.BOTH, expand=True, padx=_BUTTON_PAD, pady=_BUTTON_PAD)
 button.bind("<Enter>", handle_click)
 
 window.after(1000, update_time)
