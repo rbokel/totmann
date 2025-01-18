@@ -12,13 +12,12 @@ from platformdirs import user_data_dir
 from strings import STRINGS
 
 
+def app_path(subpath):
+    return path.join(path.dirname(__file__), subpath)
 
-def app_path(localPath):
-    return path.join(path.dirname(__file__), localPath)
 
-
-def app_data_path(localPath):
-    return path.join(user_data_dir("Totmann", "org.qlod"), localPath)
+def app_data_path(subpath):
+    return path.join(user_data_dir("Totmann", "org.qlod"), subpath)
 
 
 class Model:
@@ -30,8 +29,8 @@ class Model:
     def __init__(self):
         self.state = Model.STATE_INIT
         self.countdown = 0
-        self.on_change_state = None
-        self.on_change_countdown = None
+        self.on_change_state = lambda: None
+        self.on_change_countdown = lambda: None
         self.alarm_length = 60
         self.countdown_length = 5 * 60
         self.timeout_length = 15 * 60
@@ -102,12 +101,12 @@ class Model:
         settings_file_path = app_data_path("settings.json")
         os.makedirs(os.path.dirname(settings_file_path), exist_ok=True)
 
-        with open(settings_file_path, "w") as f:
+        with open(settings_file_path, "w", encoding="utf-8") as f:
             json.dump(settings, f)
 
     def load_settings(self):
         try:
-            with open(app_data_path("settings.json"), "r") as f:
+            with open(app_data_path("settings.json"), "r", encoding="utf-8") as f:
                 settings = json.load(f)
                 self.alarm_length = settings.get("alarm_length", 60)
                 self.countdown_length = settings.get("countdown_length", 5 * 60)
@@ -120,9 +119,9 @@ class Model:
 class View:
     BUTTON_PAD = 30
 
-    def __init__(self, root, controller, lang="en"):
-        self.root = root
-        self.controller = controller
+    def __init__(self, _root, _controller, lang="en"):
+        self.root = _root
+        self.controller = _controller
         self.set_lang(lang)
         self.root.attributes("-topmost", True)
 
@@ -135,7 +134,7 @@ class View:
     def set_lang(self, lang):
         self.lang = lang
         self.strings = STRINGS[self.lang]
-        root.title(self.strings["TITLE"])
+        self.root.title(self.strings["TITLE"])
 
     def render_settings_view(self):
         self.remove_widgets()
@@ -210,12 +209,12 @@ class View:
 
 
 class Controller:
-    def __init__(self, model, view):
-        self.model = model
-        self.view = view
+    def __init__(self, _model, _view):
+        self.model = _model
+        self.view = _view
 
-        model.on_change_state = self.handle_change_state
-        model.on_change_countdown = self.handle_change_countdown
+        _model.on_change_state = self.handle_change_state
+        _model.on_change_countdown = self.handle_change_countdown
 
     def load_settings(self):
         self.model.load_settings()
@@ -248,10 +247,10 @@ class Controller:
             self.view.show_window()
             self.beep()
 
-    def handle_click_reset(self, event=None):
+    def handle_click_reset(self):
         self.model.switch_to_timeout()
 
-    def handle_click_start(self, event=None):
+    def handle_click_start(self):
         self.model.timeout_length = self.view.timeout.get() * 60
         self.model.countdown_length = self.view.countdown.get() * 60
         self.model.alarm_length = self.view.alarm.get() * 60
