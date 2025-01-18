@@ -7,7 +7,7 @@ import win32com.client
 shutil.rmtree("dist", ignore_errors=True)
 
 pyi.run([
-    "app_totmann.py",
+    "app_totmann_mvc.py",
     "--name=totmann",
     "--icon=./tm_32.ico",
     "--add-binary=./beep.mp3;.",

@@ -2,7 +2,7 @@ from os import path
 import tkinter as tk
 from playsound import playsound
 import json
-import strings as s
+from strings import STRINGS
 
 
 class Model:
@@ -19,6 +19,8 @@ class Model:
         self.alarm_length = 60
         self.countdown_length = 5 * 60
         self.timeout_length = 15 * 60
+        self.lang = "en"
+        self.load_settings()
 
     def set_state(self, state):
         self.state = state
@@ -79,6 +81,7 @@ class Model:
             "alarm_length": self.alarm_length,
             "countdown_length": self.countdown_length,
             "timeout_length": self.timeout_length,
+            "lang": self.lang
         }
         with open("settings.json", "w") as f:
             json.dump(settings, f)
@@ -90,6 +93,7 @@ class Model:
                 self.alarm_length = settings.get("alarm_length", 60)
                 self.countdown_length = settings.get("countdown_length", 5 * 60)
                 self.timeout_length = settings.get("timeout_length", 15 * 60)
+                self.lang = settings.get("lang", "en")
         except FileNotFoundError:
             pass
 
@@ -97,9 +101,10 @@ class Model:
 class View:
     BUTTON_PAD = 30
 
-    def __init__(self, root, controller):
+    def __init__(self, root, controller, lang="en"):
         self.root = root
         self.controller = controller
+        self.set_lang(lang)
         self.root.attributes("-topmost", True)
 
         self.countdown = tk.IntVar(value=5)
@@ -108,28 +113,34 @@ class View:
 
         self.render_settings_view()
 
+    def set_lang(self, lang):
+        self.lang = lang
+        self.strings = STRINGS[self.lang]
+        root.title(self.strings["TITLE"])
+
+
     def render_settings_view(self):
         self.remove_widgets()
         self.stop_timer()
-        self.label = tk.Label(text=s.TITLE, font=("Arial", 32))
+        self.label = tk.Label(text=self.strings["TITLE"], font=("Arial", 32))
         self.label.pack()
-        self.timeout_label = tk.Label(text=s.TIMEOUT_LABEL_TEXT, font=("Arial", 16))
+        self.timeout_label = tk.Label(text=self.strings["TIMEOUT_LABEL_TEXT"], font=("Arial", 16))
         self.timeout_label.pack()
         self.timeout_entry = tk.Entry(textvariable=self.timeout, font=("Arial", 16))
         self.timeout_entry.pack()
 
-        self.countdown_label = tk.Label(text=s.COUNTDOWN_LABEL_TEXT, font=("Arial", 16))
+        self.countdown_label = tk.Label(text=self.strings["COUNTDOWN_LABEL_TEXT"], font=("Arial", 16))
         self.countdown_label.pack()
         self.countdown_entry = tk.Entry(textvariable=self.countdown, font=("Arial", 16))
         self.countdown_entry.pack()
 
-        self.alarm_label = tk.Label(text=s.ALARM_LABEL_TEXT, font=("Arial", 16))
+        self.alarm_label = tk.Label(text=self.strings["ALARM_LABEL_TEXT"], font=("Arial", 16))
         self.alarm_label.pack()
         self.alarm_entry = tk.Entry(textvariable=self.alarm, font=("Arial", 16))
         self.alarm_entry.pack()
 
         self.button = tk.Button(
-            text=s.START_BUTTON_TEXT,
+            text=self.strings["START_BUTTON_TEXT"],
             command=self.controller.handle_click_start,
             font=("Arial", 32),
         )
@@ -140,10 +151,10 @@ class View:
     def render_main_view(self):
         self.remove_widgets()
         self.start_timer()
-        self.label = tk.Label(text=s.TITLE, font=("Arial", 32))
+        self.label = tk.Label(text=self.strings["TITLE"], font=("Arial", 32))
         self.label.pack()
         self.button = tk.Button(
-            text=s.RESET_BUTTON_TEXT,
+            text=self.strings["RESET_BUTTON_TEXT"],
             command=self.controller.handle_click_reset,
             font=("Arial", 32),
         )
@@ -162,7 +173,7 @@ class View:
         self.root.after_cancel(self.controller.update_time)
 
     def update_label(self, time):
-        text = s.ALARM_TEXT.format(minutes=time // 60, seconds=time % 60)
+        text = self.strings["ALARM_TEXT"].format(minutes=time // 60, seconds=time % 60)
         self.label["text"] = text
 
     def hide_window(self):
@@ -187,14 +198,15 @@ class Controller:
         self.view.timeout.set(self.model.timeout_length // 60)
         self.view.countdown.set(self.model.countdown_length // 60)
         self.view.alarm.set(self.model.alarm_length // 60)
-
+        self.view.set_lang(self.model.lang)
+        
     def appPath(self, localPath):
         return path.join(path.dirname(__file__), localPath)
 
     def beep(self):
         print("BEEP!")
-        # playsound(self.appPath("beep.mp3"))
-        # playsound(self.appPath("hilfe.mp3"))
+        playsound(self.appPath("beep.mp3"))
+        playsound(self.appPath("hilfe.mp3"))
 
     def update_time(self):
         self.model.update_time()
@@ -222,6 +234,7 @@ class Controller:
         self.model.timeout_length = self.view.timeout.get() * 60
         self.model.countdown_length = self.view.countdown.get() * 60
         self.model.alarm_length = self.view.alarm.get() * 60
+        self.model.lang = self.view.lang
         self.model.save_settings()
         self.model.switch_to_timeout()
         self.view.render_main_view()
@@ -230,7 +243,6 @@ class Controller:
 if __name__ == "__main__":
     model = Model()
     root = tk.Tk()
-    root.title(s.TITLE)
     root.geometry("400x400")
     controller = Controller(model, None)
     view = View(root, controller)
