@@ -1,8 +1,24 @@
+# lib
+import os
 from os import path
 import tkinter as tk
-from playsound import playsound
 import json
+
+# 3rd party
+from playsound import playsound
+from platformdirs import user_data_dir
+
+# local
 from strings import STRINGS
+
+
+
+def app_path(localPath):
+    return path.join(path.dirname(__file__), localPath)
+
+
+def app_data_path(localPath):
+    return path.join(user_data_dir("Totmann", "org.qlod"), localPath)
 
 
 class Model:
@@ -81,14 +97,17 @@ class Model:
             "alarm_length": self.alarm_length,
             "countdown_length": self.countdown_length,
             "timeout_length": self.timeout_length,
-            "lang": self.lang
+            "lang": self.lang,
         }
-        with open("settings.json", "w") as f:
+        settings_file_path = app_data_path("settings.json")
+        os.makedirs(os.path.dirname(settings_file_path), exist_ok=True)
+
+        with open(settings_file_path, "w") as f:
             json.dump(settings, f)
 
     def load_settings(self):
         try:
-            with open("settings.json", "r") as f:
+            with open(app_data_path("settings.json"), "r") as f:
                 settings = json.load(f)
                 self.alarm_length = settings.get("alarm_length", 60)
                 self.countdown_length = settings.get("countdown_length", 5 * 60)
@@ -118,23 +137,28 @@ class View:
         self.strings = STRINGS[self.lang]
         root.title(self.strings["TITLE"])
 
-
     def render_settings_view(self):
         self.remove_widgets()
         self.stop_timer()
         self.label = tk.Label(text=self.strings["TITLE"], font=("Arial", 32))
         self.label.pack()
-        self.timeout_label = tk.Label(text=self.strings["TIMEOUT_LABEL_TEXT"], font=("Arial", 16))
+        self.timeout_label = tk.Label(
+            text=self.strings["TIMEOUT_LABEL_TEXT"], font=("Arial", 16)
+        )
         self.timeout_label.pack()
         self.timeout_entry = tk.Entry(textvariable=self.timeout, font=("Arial", 16))
         self.timeout_entry.pack()
 
-        self.countdown_label = tk.Label(text=self.strings["COUNTDOWN_LABEL_TEXT"], font=("Arial", 16))
+        self.countdown_label = tk.Label(
+            text=self.strings["COUNTDOWN_LABEL_TEXT"], font=("Arial", 16)
+        )
         self.countdown_label.pack()
         self.countdown_entry = tk.Entry(textvariable=self.countdown, font=("Arial", 16))
         self.countdown_entry.pack()
 
-        self.alarm_label = tk.Label(text=self.strings["ALARM_LABEL_TEXT"], font=("Arial", 16))
+        self.alarm_label = tk.Label(
+            text=self.strings["ALARM_LABEL_TEXT"], font=("Arial", 16)
+        )
         self.alarm_label.pack()
         self.alarm_entry = tk.Entry(textvariable=self.alarm, font=("Arial", 16))
         self.alarm_entry.pack()
@@ -199,14 +223,11 @@ class Controller:
         self.view.countdown.set(self.model.countdown_length // 60)
         self.view.alarm.set(self.model.alarm_length // 60)
         self.view.set_lang(self.model.lang)
-        
-    def appPath(self, localPath):
-        return path.join(path.dirname(__file__), localPath)
 
     def beep(self):
         print("BEEP!")
-        playsound(self.appPath("beep.mp3"))
-        playsound(self.appPath("hilfe.mp3"))
+        playsound(app_path("beep.mp3"))
+        playsound(app_path("hilfe.mp3"))
 
     def update_time(self):
         self.model.update_time()
