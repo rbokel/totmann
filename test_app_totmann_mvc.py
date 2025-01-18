@@ -20,7 +20,7 @@ class TestModel(unittest.TestCase):
         self.model.state = app.Model.STATE_WAITING_FOR_TIMEOUT
         self.model.countdown = 1
         self.model.update_time()
-        self.assertEqual(self.model.countdown, app.Model.COUNTDOWN_LENGTH)
+        self.assertEqual(self.model.countdown, self.model.countdown_length)
         self.assertTrue(self.countdown_changed)
         self.assertTrue(self.state_changed)
         self.assertEqual(self.model.state, app.Model.STATE_COUNTING_DOWN)
@@ -29,16 +29,16 @@ class TestModel(unittest.TestCase):
         self.model.state = app.Model.STATE_COUNTING_DOWN
         self.model.countdown = 1
         self.model.update_time()
-        self.assertEqual(self.model.countdown, app.Model.COUNTDOWN_LENGTH)
+        self.assertEqual(self.model.countdown, self.model.alarm_length)
         self.assertTrue(self.countdown_changed)
         self.assertTrue(self.state_changed)
-        self.assertEqual(self.model.state, app.Model.STATE_COUNTING_DOWN)
+        self.assertEqual(self.model.state, app.Model.STATE_ALARMING)
 
     def test_update_time_init(self):
         self.model.state = app.Model.STATE_INIT
         self.model.countdown = 1
         self.model.update_time()
-        self.assertEqual(self.model.countdown, app.Model.TIMEOUT_LENGTH)
+        self.assertEqual(self.model.countdown, self.model.timeout_length)
         self.assertTrue(self.countdown_changed)
         self.assertTrue(self.state_changed)
         self.assertEqual(self.model.state, app.Model.STATE_WAITING_FOR_TIMEOUT)
